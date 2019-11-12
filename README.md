@@ -1,6 +1,6 @@
 # drive-tester
 
-[![Build Status](https://travis-ci.org/miranovy/puppet-php.svg?branch=master)](https://travis-ci.org/miranovy/puppet-php)
+[![Build Status](https://travis-ci.org/miranovy/drive-tester.svg?branch=master)](https://travis-ci.org/miranovy/drive-tester)
 
 Drive tester utility.
 
