@@ -1,0 +1,6 @@
+parameters:
+    storeDir: %tempDir%/data
+    logFilename: %tempDir%/drive-tester.log
+
+services:
+    ProcessFactory: App\Process\MockProcessFactory

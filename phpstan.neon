@@ -1,0 +1,13 @@
+parameters:
+    level: max
+    autoload_directories:
+        - %currentWorkingDirectory%/src
+
+    ignoreErrors:
+        -
+            message: '#of class Jenner\\SimpleFork\\Process constructor expects string#'
+            path: src/Console/Drive/TestCommand.php
+
+includes:
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon

@@ -1,0 +1,10 @@
+forge "http://forge.puppetlabs.com"
+
+# php-cli
+mod 'puppet-archive', '2.3.0'
+mod 'puppetlabs-stdlib', '4.25.1'
+mod 'puppetlabs-apt', '4.5.1'
+mod 'puppetlabs-inifile', '2.2.2'
+mod 'puppet-zypprepo', '2.2.1'
+mod 'puppet-php',
+    :git => 'https://github.com/voxpupuli/puppet-php'

@@ -1,0 +1,6 @@
+# Composer
+/vendor
+
+# Tests
+/temp
+/coverage.xml

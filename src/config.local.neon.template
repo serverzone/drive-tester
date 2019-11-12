@@ -1,0 +1,7 @@
+parameters:
+    storeDir: %appDir%/../data
+    logFilename: %appDir%/../log/drive-tester.log
+
+services:
+    # Send notification to Mattermost
+    #- App\Mattermost\MattermostWebHook('https://mattermost.my-company.net/hooks/xxx')
