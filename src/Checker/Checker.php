@@ -72,29 +72,29 @@ class Checker implements Runnable
 
             $options = [
                 'startedAt' => new DateTime(),
-                'sn' => $driveSerialNumber,
+                'serialNumber' => $driveSerialNumber,
             ];
 
             $this->updateStatus($status, 'Getting parted info');
-            $drive->getPartedInfo(array_merge($options, ['name' => 'parted']));
+            $drive->getPartedInfo(array_merge($options, ['label' => 'parted']));
 
             $this->updateStatus($status, 'Storing smartctl info');
-            $drive->getSmartctlInfo(array_merge($options, ['name' => 'smartctl']));
+            $drive->getSmartctlInfo(array_merge($options, ['label' => 'smartctl']));
 
             $this->updateStatus($status, 'Checking bad blocks');
-            $badBlocksCount = $drive->badblocks(array_merge($options, ['name' => 'badblocks']));
+            $badBlocksCount = $drive->badblocks(array_merge($options, ['label' => 'badblocks']));
             if ($badBlocksCount != 0) {
                 $this->updateStatus($status, sprintf('%d bad blocks found', $badBlocksCount), Status::STATE_ERROR);
             }
 
             $this->updateStatus($status, 'Storing smartctl info');
-            $drive->getSmartctlInfo(array_merge($options, ['name' => 'smartctl.badblocks']));
+            $drive->getSmartctlInfo(array_merge($options, ['label' => 'smartctl.badblocks']));
 
             if ($drive->isSsd()) {
                 $this->updateStatus($status, 'Running fstrim');
-                $drive->fstrim(array_merge($options, ['name' => 'fstrim']));
+                $drive->fstrim(array_merge($options, ['label' => 'fstrim']));
                 $this->updateStatus($status, 'Storing smartctl info');
-                $drive->getSmartctlInfo(array_merge($options, ['name' => 'smartctl.fstrim']));
+                $drive->getSmartctlInfo(array_merge($options, ['label' => 'smartctl.fstrim']));
             }
 
             $this->updateStatus($status, 'OK', Status::STATE_DONE);

@@ -47,10 +47,10 @@ final class FileStorage implements EventSubscriberInterface
      */
     public function onCommandEvent(CommandEvent $event): void
     {
-        $filename = $event->getOption('name');
+        $filename = $event->getOption('label');
         if ($filename !== null) {
             $process = $event->getProcess();
-            $storeDir = sprintf('%s/%s/%s/', $this->storeDirPrefix, $event->getOption('sn'), $event->getOption('startedAt')->format('Ymd-His'));
+            $storeDir = sprintf('%s/%s/%s/', $this->storeDirPrefix, $event->getOption('serialNumber'), $event->getOption('startedAt')->format('Ymd-His'));
             FileSystem::createDir($storeDir);
 
             file_put_contents($storeDir . $filename . '.stdout', $process->getOutput());
