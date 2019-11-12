@@ -1,5 +1,7 @@
 # drive-tester
 
+[![Build Status](https://travis-ci.org/miranovy/puppet-php.svg?branch=master)](https://travis-ci.org/miranovy/puppet-php)
+
 Drive tester utility.
 
 ## Runtime requirements
