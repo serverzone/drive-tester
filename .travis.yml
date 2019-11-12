@@ -10,21 +10,15 @@ install:
   # Composer
   - travis_retry composer install --no-progress --prefer-dist
 
-script:
-  # Tests
-  - make tests
-
 jobs:
   include:
+    - script:
+        - make tests
+
     - stage: Quality Assurance
       php: 7.2
       script:
         - make qa
-
-    - stage: Phpstan
-      php: 7.2
-      script:
-        - make phpstan
 
 sudo: false
 
