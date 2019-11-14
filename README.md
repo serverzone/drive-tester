@@ -32,12 +32,20 @@ Utility use configuration from file `src/config.local.neon`.
 
 ### Parameters
 
-* **storeDir** - Directory path to store smart informations.
 * **logFilename** - Log file name with path.
 
 ### Services
 
-To send notification to Mattermost uncomment MattermostWebHook service and specify url value.
+#### Store process outputs to file
+
+To enable/disable store processs ouptut to file uncomment/comment FileStorage service and specify store directory.
+```yml
+    - App\Event\Subscriber\StoreProcessOutput\FileStorage('%appDir%/../data')
+```
+
+#### Mattermost notification
+
+To enable/disable send notification to Mattermost uncomment/comment MattermostWebHook service and specify url value.
 ```yml
     - App\Event\Subscriber\SendNotification\MattermostWebHook('https://mattermost.my-company.net/hooks/xxx')
 ```

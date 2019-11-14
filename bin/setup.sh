@@ -34,3 +34,11 @@ fi
 #
 cd $DIR/../
 make vendor
+
+#
+# Create default local configuration
+#
+pwd
+if [ ! -f src/config.local.neon ]; then
+    cp src/config.local.neon.template src/config.local.neon
+fi

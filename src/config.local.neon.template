@@ -1,7 +1,6 @@
-parameters:
-    storeDir: %appDir%/../data
-    logFilename: %appDir%/../log/drive-tester.log
-
 services:
+    # Store process output
+    - App\Event\Subscriber\StoreProcessOutput\FileStorage('%appDir%/../data')
+
     # Send notification to Mattermost
     #- App\Event\Subscriber\SendNotification\MattermostWebHook('https://mattermost.my-company.net/hooks/xxx')
