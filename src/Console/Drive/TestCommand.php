@@ -106,8 +106,8 @@ class TestCommand extends Command
         }
 
         // run test
-        $sections = $this->createOutputSections($paths, $output);
         $output->writeln('Drive tester result:');
+        $sections = $this->createOutputSections($paths, $output);
         $statuses = $this->runTests($paths, $sections);
 
         // send event
