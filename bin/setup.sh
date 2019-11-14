@@ -23,7 +23,14 @@ r10k puppetfile install
 puppet apply --modulepath=site:modules site.pp
 
 #
+# Install composer
+#
+if [ ! -f /usr/bin/composer ]; then
+    wget https://raw.githubusercontent.com/composer/getcomposer.org/76a7060ccb93902cd7576b67264ad91c8a2700e2/web/installer -O - -q | php -- --install-dir="/usr/bin" --filename="composer"
+fi
+
+#
 # Install composer packages
 #
-cd $DIR
+cd $DIR/../
 make vendor
