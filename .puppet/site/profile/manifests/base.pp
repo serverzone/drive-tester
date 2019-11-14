@@ -5,7 +5,7 @@
 
 class profile::base {
 
-    package { ['smartmontools', 'sdparm']:
+    package { ['smartmontools', 'sdparm', 'parted']:
             ensure => latest,
     }
 
