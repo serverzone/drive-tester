@@ -125,7 +125,7 @@ class DriveTesterCommandTest extends \Tester\TestCase
 
         // prepare mockers
         $driveDiscoveryCmd = Mockery::mock(DriveDiscoveryCommand::class, [
-            'detectSystemDrive' => $drive,
+            'detectSystemDrives' => [$drive, '/dev/sdddd'],
         ]);
         $checker = Mockery::mock(
             Checker::class,

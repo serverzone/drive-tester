@@ -9,6 +9,7 @@ services:
     - App\Command\GetSerialNumberCommand(@ProcessFactory)
     - App\Command\PartedCommand(@ProcessFactory)
     - App\Command\SmartCtlCommand(@ProcessFactory)
+    - App\Command\MdadmCommand(@ProcessFactory)
 
     - App\Drive\DriveFactory
     - App\Checker\CheckerFactory

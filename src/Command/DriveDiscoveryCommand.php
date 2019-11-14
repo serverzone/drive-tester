@@ -4,11 +4,31 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Process\IProcessFactory;
+use Contributte\Utils\Strings;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+
 /**
  * Drive detector command.
  */
 class DriveDiscoveryCommand extends BaseCommand
 {
+    /** @var MdadmCommand Mdadm command */
+    private $mdadmCmd;
+
+    /**
+     * Class constructor.
+     *
+     * @param IProcessFactory $processFactory Process factory
+     * @param EventDispatcherInterface $dispatcher Event dispatcher
+     * @param LoggerInterface $logger Logger
+     */
+    public function __construct(IProcessFactory $processFactory, EventDispatcherInterface $dispatcher, LoggerInterface $logger, MdadmCommand $mdadmCmd)
+    {
+        parent::__construct($processFactory, $dispatcher, $logger);
+        $this->mdadmCmd = $mdadmCmd;
+    }
 
     /**
      * Detect all drives.
@@ -24,15 +44,27 @@ class DriveDiscoveryCommand extends BaseCommand
     }
 
     /**
-     * Detect system drive.
+     * Detect system drive(s).
      *
-     * @return string|null
+     * @return array
      */
-    public function detectSystemDrive(): ?string
+    public function detectSystemDrives(): array
     {
         $process = $this->runCommand(['/bin/df', '/']);
-        preg_match_all('#/dev/sd[a-z]+#', $process->getOutput(), $matches);
+        preg_match_all('#/dev/(sd[a-z]+|md[0-9])#', $process->getOutput(), $matches);
+        $drive = $matches[0][0] ?? null;
 
-        return $matches[0][0] ?? null;
+        if ($drive === null) {
+            return [];
+        }
+
+        if (Strings::startsWith($drive, '/dev/md')) {
+            $detail = $this->mdadmCmd->queryDetail($drive);
+            preg_match_all('#/dev/sd[a-z]+#', $detail, $matches);
+
+            return $matches[0];
+        }
+
+        return [$drive];
     }
 }

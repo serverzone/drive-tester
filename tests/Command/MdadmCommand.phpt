@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\DriveTester\Command;
 
+use App\Command\MdadmCommand;
 use Tester\Assert;
 use Nette\DI\Container;
-use App\Command\PartedCommand;
 use App\Process\MockProcessFactory;
 
 $container = require __DIR__ . '/../bootstrap.php';
 
 /**
- * Parted command test.
+ * Mdadm command test.
  */
 class MdadmCommandTest extends \Tester\TestCase
 {
-     /** @var PartedCommand Parted command */
+     /** @var MdadmCommand Mdadm command */
      private $mdadmCmd;
 
      /** @var MockProcessFactory Process factory */
@@ -29,21 +29,21 @@ class MdadmCommandTest extends \Tester\TestCase
       */
     public function __construct(Container $container)
     {
-         $this->mdadmCmd = $container->getByType('App\Command\PartedCommand');
+         $this->mdadmCmd = $container->getByType('App\Command\MdadmCommand');
          $this->processFactory = $container->getService('ProcessFactory');
     }
 
      /**
-      * Get partition information test.
+      * Mdadm query detail test.
       *
       * @return void
       */
-    public function testPrint(): void
+    public function testQueryDetail(): void
     {
-         $output = "BYT;" . PHP_EOL . "/dev/sda:1000GB:scsi:512:512:gpt:ATA ST31000340NS:;";
+         $output = "mdadm output";
 
          $this->processFactory->addCommand(['/bin/echo', $output]);
-         Assert::same($output, $this->mdadmCmd->print('/dev/sda'));
+         Assert::same($output, $this->mdadmCmd->queryDetail('/dev/md0'));
     }
 
      /**
@@ -55,7 +55,7 @@ class MdadmCommandTest extends \Tester\TestCase
     public function testCommandExitCode(): void
     {
          $this->processFactory->addCommand(['/bin/bash', '-c', 'exit 1']);
-         $this->mdadmCmd->print('/dev/sdb');
+         $this->mdadmCmd->queryDetail('/dev/md0');
     }
 
      /**
@@ -67,7 +67,7 @@ class MdadmCommandTest extends \Tester\TestCase
     public function testCommandNotFound(): void
     {
          $this->processFactory->addCommand(['failed_command']);
-         $this->mdadmCmd->print('/dev/sdb');
+         $this->mdadmCmd->queryDetail('/dev/md0');
     }
 }
 
