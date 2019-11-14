@@ -5,17 +5,17 @@ services:
     - App\Command\FstrimCommand(@ProcessFactory)
     - App\Command\GetSerialNumberCommand(@ProcessFactory)
     - App\Command\PartedCommand(@ProcessFactory)
-    - App\Command\SmartCtlCommand(@ProcessFactory)   
+    - App\Command\SmartCtlCommand(@ProcessFactory)
 
     - App\Drive\DriveFactory
     - App\Checker\CheckerFactory
     - App\Checker\SharedStatusCache
 
-    - App\StoreProcessOutput\FileStorage(%storeDir%)  
-    
+    - App\Event\Subscriber\StoreProcessOutput\FileStorage(%storeDir%)
+
     - App\Console\Drive\ListCommand
     - App\Console\Drive\TestCommand
-    
+
 extensions:
     console: Contributte\Console\DI\ConsoleExtension(%consoleMode%)
     monolog: Contributte\Monolog\DI\MonologExtension

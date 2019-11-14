@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * Abstract base command.
  */
-abstract class BaseCommand
+abstract class BaseCommand implements ICommand
 {
 
     /** @var IProcessFactory Process factory */
@@ -25,6 +25,9 @@ abstract class BaseCommand
 
     /** @var LoggerInterface Logger */
     protected $logger;
+
+    /** @var Process Process */
+    private $process;
 
     /**
      * Class constructor.
@@ -41,6 +44,16 @@ abstract class BaseCommand
     }
 
     /**
+     * Return process.
+     *
+     * @return Process
+     */
+    public function getProcess(): Process
+    {
+        return $this->process;
+    }
+
+    /**
      * Run external command and return his output.
      *
      * @param array $command Command
@@ -54,27 +67,27 @@ abstract class BaseCommand
         $this->logger->debug('Running command', ['command' => implode(" ", $command)]);
 
         // create process
-        $process = $this->processFactory->create($command);
-        $process->setTimeout($timeout);
+        $this->process = $this->processFactory->create($command);
+        $this->process->setTimeout($timeout);
 
         // run process
-        $process->run();
+        $this->process->run();
 
         // log exit status
         $this->logger->info('Command exited', [
             'command' => implode(" ", $command),
-            'exitCode' => $process->getExitCode(),
-            'time' => $process->getRunningTime(),
+            'exitCode' => $this->process->getExitCode(),
+            'time' => $this->process->getRunningTime(),
         ]);
 
         // send event
-        $this->dispatcher->dispatch(new CommandEvent($process, $eventOptions));
+        $this->dispatcher->dispatch(new CommandEvent($this, $eventOptions));
 
         // check must run option
-        if ($mustRun && $process->isSuccessful() === false) {
-            throw new ProcessFailedException($process);
+        if ($mustRun && $this->process->isSuccessful() === false) {
+            throw new ProcessFailedException($this->process);
         }
 
-        return $process;
+        return $this->process;
     }
 }

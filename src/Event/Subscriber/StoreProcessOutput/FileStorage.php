@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\StoreProcessOutput;
+namespace App\Event\Subscriber\StoreProcessOutput;
 
 use Contributte\Utils\FileSystem;
-use App\Command\Event\CommandEndEvent;
 use App\Event\CommandEvent;
+use App\Command\ICommand;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -49,7 +49,7 @@ final class FileStorage implements EventSubscriberInterface
     {
         $filename = $event->getOption('label');
         if ($filename !== null) {
-            $process = $event->getProcess();
+            $process = $event->getCommand()->getProcess();
             $storeDir = sprintf('%s/%s/%s/', $this->storeDirPrefix, $event->getOption('serialNumber'), $event->getOption('startedAt')->format('Ymd-His'));
             FileSystem::createDir($storeDir);
 

@@ -39,7 +39,7 @@ Utility use configuration from file `src/config.local.neon`.
 
 To send notification to Mattermost uncomment MattermostWebHook service and specify url value.
 ```yml
-    - App\Mattermost\MattermostWebHook('https://mattermost.my-company.net/hooks/xxx')
+    - App\Event\Subscriber\SendNotification\MattermostWebHook('https://mattermost.my-company.net/hooks/xxx')
 ```
 
 ## Usage

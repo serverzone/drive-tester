@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Mattermost;
+namespace App\Event\Subscriber\SendNotification;
 
 use App\Event\ConsoleDriveTestCommandEvent;
 use GuzzleHttp;

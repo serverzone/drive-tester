@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Event;
 
-use App\Process\Process;
+use App\Command\ICommand;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -12,8 +12,8 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class CommandEvent extends Event
 {
-    /** @var Process Process */
-    private $process;
+    /** @var ICommand Command */
+    private $command;
 
     /** @var Array Event options */
     private $options;
@@ -21,23 +21,23 @@ class CommandEvent extends Event
     /**
      * Class constructor.
      *
-     * @param Process $process Process
+     * @param ICommand $command Command
      * @param array $options Event options
      */
-    public function __construct(Process $process, array $options = [])
+    public function __construct(ICommand $command, array $options = [])
     {
-        $this->process = $process;
+        $this->command = $command;
         $this->options = $options;
     }
 
     /**
-     * Return process.
+     * Return command.
      *
-     * @return Process
+     * @return ICommand
      */
-    public function getProcess(): Process
+    public function getCommand(): ICommand
     {
-        return $this->process;
+        return $this->command;
     }
 
     /**
