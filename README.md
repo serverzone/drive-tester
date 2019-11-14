@@ -1,6 +1,6 @@
 # drive-tester
 
-[![Build Status](https://travis-ci.org/serverzone/drive-tester.svg?branch=master)](https://travis-ci.org/miranovy/drive-tester)
+[![Build Status](https://travis-ci.org/serverzone/drive-tester.svg?branch=master)](https://travis-ci.org/serverzone/drive-tester)
 
 Drive tester utility.
 
