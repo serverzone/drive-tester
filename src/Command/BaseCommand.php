@@ -6,40 +6,32 @@ namespace App\Command;
 
 use App\Process\IProcessFactory;
 use Psr\Log\LoggerInterface;
-use App\Event\CommandEvent;
 use App\Process\Process;
 use App\Process\ProcessFailedException;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Abstract base command.
  */
-abstract class BaseCommand implements ICommand
+abstract class BaseCommand
 {
-
     /** @var IProcessFactory Process factory */
     protected $processFactory;
-
-    /** @var EventDispatcherInterface Event dispatcher */
-    protected $dispatcher;
 
     /** @var LoggerInterface Logger */
     protected $logger;
 
     /** @var Process Process */
-    private $process;
+    protected $process;
 
     /**
      * Class constructor.
      *
      * @param IProcessFactory $processFactory Process factory
-     * @param EventDispatcherInterface $dispatcher Event dispatcher
      * @param LoggerInterface $logger Logger
      */
-    public function __construct(IProcessFactory $processFactory, EventDispatcherInterface $dispatcher, LoggerInterface $logger)
+    public function __construct(IProcessFactory $processFactory, LoggerInterface $logger)
     {
         $this->processFactory = $processFactory;
-        $this->dispatcher = $dispatcher;
         $this->logger = $logger;
     }
 
@@ -59,10 +51,28 @@ abstract class BaseCommand implements ICommand
      * @param array $command Command
      * @param int $timeout Command timeout
      * @param bool $mustRun Must run flag
-     * @param array $eventOptions Event options
-     * @return Process
+     * @param array $options Options
+     * @return mixed
      */
-    protected function runCommand(array $command, int $timeout = 120, bool $mustRun = true, array $eventOptions = []): Process
+    protected function runCommand(array $command, int $timeout = 120, bool $mustRun = true, array $options = [])
+    {
+        $this->runProcess($command, $timeout);
+
+        if ($mustRun && $this->process->isSuccessful() === false) {
+            throw new ProcessFailedException($this->process);
+        }
+
+        return $this->processResult($options);
+    }
+
+    /**
+     * Run command process.
+     *
+     * @param array $command Command
+     * @param integer $timeout Run timeout
+     * @return void
+     */
+    protected function runProcess(array $command, int $timeout = 120): void
     {
         $this->logger->debug('Running command', ['command' => implode(" ", $command)]);
 
@@ -79,15 +89,16 @@ abstract class BaseCommand implements ICommand
             'exitCode' => $this->process->getExitCode(),
             'time' => $this->process->getRunningTime(),
         ]);
+    }
 
-        // send event
-        $this->dispatcher->dispatch(new CommandEvent($this, $eventOptions));
-
-        // check must run option
-        if ($mustRun && $this->process->isSuccessful() === false) {
-            throw new ProcessFailedException($this->process);
-        }
-
-        return $this->process;
+    /**
+     * Processing command result.
+     *
+     * @param array $options Options
+     * @return mixed
+     */
+    protected function processResult(array $options = [])
+    {
+        return $this->process->isSuccessful() ? $this->process->getOutput() : null;
     }
 }

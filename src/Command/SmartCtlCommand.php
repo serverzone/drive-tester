@@ -17,16 +17,16 @@ class SmartCtlCommand extends BaseCommand
      *
      * @param string $path Drive path
      * @param array $eventOptions Event options
-     * @return string
+     * @return string|null
      */
-    public function getInfo(string $path, array $eventOptions = []): string
+    public function getInfo(string $path, array $eventOptions = []): ?string
     {
-        $process = $this->runCommand(['/usr/sbin/smartctl', '--all', $path], 120, false, $eventOptions);
+        $result = $this->runCommand(['/usr/sbin/smartctl', '--all', $path], 120, false, $eventOptions);
 
-        if (($process->getExitCode() & 0x1) !== 0) {
-            throw new ProcessFailedException($process);
+        if (($this->process->getExitCode() & 0x1) !== 0) {
+            throw new ProcessFailedException($this->process);
         }
 
-        return $process->getOutput();
+        return $result;
     }
 }

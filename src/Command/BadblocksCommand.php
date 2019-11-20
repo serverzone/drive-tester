@@ -18,10 +18,18 @@ class BadblocksCommand extends BaseCommand
      */
     public function detect(string $path, array $eventOptions = []): int
     {
-        $process = $this->runCommand(['/sbin/badblocks',  '-wve150', '-b8192', $path], 10 * 24 * 3600, true, $eventOptions);
+        return $this->runCommand(['/sbin/badblocks',  '-wve150', '-b8192', $path], 10 * 24 * 3600, true, $eventOptions);
+    }
 
-        // parse output
-        preg_match_all('#Pass completed, ([0-9]*) bad blocks found.#', $process->getOutput() . $process->getErrorOutput(), $matches);
+    /**
+     * Processing command result.
+     *
+     * @param array $options Options
+     * @return mixed
+     */
+    protected function processResult(array $options = [])
+    {
+        preg_match_all('#Pass completed, ([0-9]*) bad blocks found.#', $this->process->getOutput() . $this->process->getErrorOutput(), $matches);
         if (isset($matches[1][0])) {
             return intval($matches[1][0]);
         }

@@ -18,8 +18,18 @@ class GetSerialNumberCommand extends BaseCommand
      */
     public function getSerialNumber(string $devPath): ?string
     {
-        $process = $this->runCommand(['/usr/bin/sdparm', '--page=sn', $devPath]);
-        $lines = explode(PHP_EOL, $process->getOutput());
+        return $this->runCommand(['/usr/bin/sdparm', '--page=sn', $devPath]);
+    }
+
+    /**
+     * Processing command result.
+     *
+     * @param array $options Options
+     * @return mixed
+     */
+    protected function processResult(array $options = [])
+    {
+        $lines = explode(PHP_EOL, $this->process->getOutput());
 
         return isset($lines[2]) ? trim($lines[2]) : null;
     }

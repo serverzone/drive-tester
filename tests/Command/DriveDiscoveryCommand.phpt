@@ -67,43 +67,18 @@ class DriveDiscoveryCommandTest extends \Tester\TestCase
     /**
      * Detect system drives test.
      *
+     * @dataProvider DriveDiscoveryCommand_DetectSystemDrives.ini
+     *
+     * @param string $fdisk Fdisk output
+     * @param string $mdadm Mdadm output
+     * @param string[] $drives Detected system drives
      * @return void
      */
-    public function testDetectSystemDrives(): void
+    public function testDetectSystemDrives(string $fdisk, string $mdadm, array $drives): void
     {
-        $this->processFactory->addCommand(['/bin/echo', "Filesystem      Size  Used Avail Use% Mounted on
-        udev             32G     0   32G   0% /dev
-        tmpfs           6.3G  9.1M  6.3G   1% /run
-        /dev/md0        9.3G  2.1G  7.3G  22% /
-        tmpfs            32G     0   32G   0% /dev/shm
-        tmpfs           5.0M     0  5.0M   0% /run/lock
-        tmpfs            32G     0   32G   0% /sys/fs/cgroup
-        tmpfs            32G   48K   32G   1% /var/lib/ceph/osd/ceph-0"]);
-        $this->processFactory->addCommand(['/bin/echo', "/dev/md0:
-        Version : 1.2
-  Creation Time : Fri Feb  5 17:24:26 2016
-     Raid Level : raid1
-     Array Size : 9756672 (9.30 GiB 9.99 GB)
-  Used Dev Size : 9756672 (9.30 GiB 9.99 GB)
-   Raid Devices : 2
-  Total Devices : 2
-    Persistence : Superblock is persistent
-
-    Update Time : Thu Nov 14 13:25:02 2019
-          State : clean
- Active Devices : 2
-Working Devices : 2
- Failed Devices : 0
-  Spare Devices : 0
-
-           Name : storage3:0
-           UUID : e3d06f8f:18a2dc1d:0a7dbf8a:11051460
-         Events : 189847
-
-    Number   Major   Minor   RaidDevice State
-       2       8      145        0      active sync   /dev/sdj1
-       3       8      161        1      active sync   /dev/sdk1"]);
-        Assert::equal(['/dev/sdj', '/dev/sdk'], $this->driveDiscoveryCmd->detectSystemDrives());
+        $this->processFactory->addCommand(['/bin/echo', $fdisk]);
+        $this->processFactory->addCommand(['/bin/echo', $mdadm]);
+        Assert::equal($drives, $this->driveDiscoveryCmd->detectSystemDrives());
     }
 
     /**

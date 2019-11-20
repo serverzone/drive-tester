@@ -6,7 +6,7 @@ namespace App\Event\Subscriber\StoreProcessOutput;
 
 use Contributte\Utils\FileSystem;
 use App\Event\CommandEvent;
-use App\Command\ICommand;
+use App\Command\IDispatcherCommand;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**

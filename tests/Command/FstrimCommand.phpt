@@ -4,21 +4,24 @@ declare(strict_types=1);
 
 namespace Tests\DriveTester\Command;
 
+use App\Command\FstrimCommand;
 use Tester\Assert;
 use Nette\DI\Container;
-use App\Command\PartedCommand;
 use App\Process\MockProcessFactory;
 
 $container = require __DIR__ . '/../bootstrap.php';
+
 /**
- * Parted command test.
+ * Fstrim command test.
  */
-class PartedCommandTest extends \Tester\TestCase
+class FstrimCommandTest extends \Tester\TestCase
 {
-     /** @var PartedCommand Parted command */
-     private $partedCmd;
+     /** @var FstrimCommand Fstrim command */
+     private $fstrimCmd;
+
      /** @var MockProcessFactory Process factory */
      private $processFactory;
+
      /**
       * Class constructor.
       *
@@ -26,20 +29,21 @@ class PartedCommandTest extends \Tester\TestCase
       */
     public function __construct(Container $container)
     {
-         $this->partedCmd = $container->getByType('App\Command\PartedCommand');
+         $this->fstrimCmd = $container->getByType('App\Command\FstrimCommand');
          $this->processFactory = $container->getService('ProcessFactory');
     }
+
      /**
-      * Get partition information test.
+      * Fstrim execute test.
       *
       * @return void
       */
-    public function testPrint(): void
+    public function testExecute(): void
     {
-         $output = "BYT;" . PHP_EOL . "/dev/sda:1000GB:scsi:512:512:gpt:ATA ST31000340NS:;";
-         $this->processFactory->addCommand(['/bin/echo', $output]);
-         Assert::same($output, $this->partedCmd->print('/dev/sda'));
+         $this->processFactory->addCommand(['/bin/echo', '']);
+         $this->fstrimCmd->execute('/dev/sda1');
     }
+
      /**
       * Command exit code test.
       *
@@ -49,8 +53,9 @@ class PartedCommandTest extends \Tester\TestCase
     public function testCommandExitCode(): void
     {
          $this->processFactory->addCommand(['/bin/bash', '-c', 'exit 1']);
-         $this->partedCmd->print('/dev/sdb');
+         $this->fstrimCmd->execute('/dev/sda1');
     }
+
      /**
       * Command not found test.
       *
@@ -60,8 +65,9 @@ class PartedCommandTest extends \Tester\TestCase
     public function testCommandNotFound(): void
     {
          $this->processFactory->addCommand(['failed_command']);
-         $this->partedCmd->print('/dev/sdb');
+         $this->fstrimCmd->execute('/dev/sda1');
     }
 }
-$test = new PartedCommandTest($container);
+
+$test = new FstrimCommandTest($container);
 $test->run();

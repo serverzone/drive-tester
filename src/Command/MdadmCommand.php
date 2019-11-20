@@ -17,8 +17,6 @@ class MdadmCommand extends BaseCommand
      */
     public function queryDetail(string $path): string
     {
-        $process = $this->runCommand(['/sbin/mdadm',  '--query', '--detail', $path]);
-
-        return $process->getOutput();
+        return $this->runCommand(['/sbin/mdadm',  '--query', '--detail', $path]);
     }
 }

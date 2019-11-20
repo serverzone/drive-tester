@@ -105,9 +105,9 @@ class Drive
      * Store smartctl info to file.
      *
      * @param array $eventOptions Event options
-     * @return string
+     * @return string|null
      */
-    public function getSmartctlInfo(array $eventOptions = []): string
+    public function getSmartctlInfo(array $eventOptions = []): ?string
     {
         return $this->smartCtlCmd->getInfo($this->path, $eventOptions);
     }
