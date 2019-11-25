@@ -14,7 +14,7 @@ Drive tester utility.
 
 ```bash
 apt-get install git
-git clone https://git.gitlab.srw.cz/ServerZone.cz/Utilities/drive-tester.git
+git clone https://github.com/serverzone/drive-tester.git
 bin/setup.sh
 ```
 
