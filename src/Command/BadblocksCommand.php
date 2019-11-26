@@ -18,7 +18,7 @@ class BadblocksCommand extends BaseCommand
      */
     public function detect(string $path, array $eventOptions = []): int
     {
-        return $this->runCommand(['/sbin/badblocks',  '-wve150', '-b8192', $path], 10 * 24 * 3600, true, $eventOptions);
+        return $this->runCommand(['/sbin/badblocks',  '-wve150', '-b8192', $path], 10 * 24 * 3600, $eventOptions);
     }
 
     /**

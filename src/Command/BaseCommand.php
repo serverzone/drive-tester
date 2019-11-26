@@ -8,6 +8,7 @@ use App\Process\IProcessFactory;
 use Psr\Log\LoggerInterface;
 use App\Process\Process;
 use App\Process\ProcessFailedException;
+use RuntimeException;
 
 /**
  * Abstract base command.
@@ -50,19 +51,31 @@ abstract class BaseCommand
      *
      * @param array $command Command
      * @param int $timeout Command timeout
-     * @param bool $mustRun Must run flag
      * @param array $options Options
      * @return mixed
      */
-    protected function runCommand(array $command, int $timeout = 120, bool $mustRun = true, array $options = [])
+    protected function runCommand(array $command, int $timeout = 120, array $options = [])
     {
         $this->runProcess($command, $timeout);
-
-        if ($mustRun && $this->process->isSuccessful() === false) {
+        if ($this->isSuccessful() === false) {
             throw new ProcessFailedException($this->process);
         }
 
         return $this->processResult($options);
+    }
+
+    /**
+     * Checks if the process ended succesfully.
+     *
+     * @return boolean
+     */
+    protected function isSuccessful(): bool
+    {
+        if ($this->process == null) {
+            throw new RuntimeException('No process has been executed yet');
+        }
+
+        return $this->process->isSuccessful();
     }
 
     /**
@@ -99,6 +112,6 @@ abstract class BaseCommand
      */
     protected function processResult(array $options = [])
     {
-        return $this->process->isSuccessful() ? $this->process->getOutput() : null;
+        return $this->isSuccessful() ? $this->process->getOutput() : null;
     }
 }

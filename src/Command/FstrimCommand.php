@@ -19,6 +19,6 @@ class FstrimCommand extends BaseCommand
      */
     public function execute(string $path, array $eventOptions = []): void
     {
-        $this->runCommand(['/sbin/fstrim', $path], 3600, true, $eventOptions);
+        $this->runCommand(['/sbin/fstrim', $path], 3600, $eventOptions);
     }
 }

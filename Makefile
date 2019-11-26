@@ -21,6 +21,7 @@ phpstan: vendor
 	vendor/bin/phpstan analyse -l max -c phpstan.neon src
 
 tests: vendor
+	rm -rf temp/tests
 	vendor/bin/tester -s -p php --colors 1 -C tests
 
 coverage: vendor

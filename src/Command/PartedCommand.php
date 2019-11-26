@@ -19,6 +19,6 @@ class PartedCommand extends BaseCommand
      */
     public function print(string $devicePath, array $eventOptions = []): string
     {
-        return $this->runCommand(['/sbin/parted', '--machine', $devicePath, 'print'], 120, true, $eventOptions);
+        return $this->runCommand(['/sbin/parted', '--machine', $devicePath, 'print'], 120, $eventOptions);
     }
 }

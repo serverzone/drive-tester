@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Process\ProcessFailedException;
+use RuntimeException;
 
 /**
  * Get SMART ctl command.
@@ -21,12 +21,20 @@ class SmartCtlCommand extends BaseCommand
      */
     public function getInfo(string $path, array $eventOptions = []): ?string
     {
-        $result = $this->runCommand(['/usr/sbin/smartctl', '--all', $path], 120, false, $eventOptions);
+        return $this->runCommand(['/usr/sbin/smartctl', '--all', $path], 120, $eventOptions);
+    }
 
-        if (($this->process->getExitCode() & 0x1) !== 0) {
-            throw new ProcessFailedException($this->process);
+    /**
+     * Checks if the process ended succesfully.
+     *
+     * @return boolean
+     */
+    protected function isSuccessful(): bool
+    {
+        if ($this->process == null) {
+            throw new RuntimeException('No process has been executed yet');
         }
 
-        return $result;
+        return ($this->process->getExitCode() & 0x1) === 0;
     }
 }

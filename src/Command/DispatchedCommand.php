@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * Abstract dispatcher command.
  */
-abstract class DispatcherCommand extends BaseCommand implements IDispatcherCommand
+abstract class DispatchedCommand extends BaseCommand implements IDispatcherCommand
 {
     /** @var mixed Command result */
     protected $result;
@@ -50,15 +50,14 @@ abstract class DispatcherCommand extends BaseCommand implements IDispatcherComma
      *
      * @param array $command Command
      * @param int $timeout Command timeout
-     * @param bool $mustRun Must run flag
      * @param array $options Options
      * @return Process
      */
-    protected function runCommand(array $command, int $timeout = 120, bool $mustRun = true, array $options = []): Process
+    protected function runCommand(array $command, int $timeout = 120, array $options = []): Process
     {
         $this->runProcess($command, $timeout);
 
-        if ($this->process->isSuccessful() || !$mustRun) {
+        if ($this->isSuccessful()) {
             $throwException = false;
             $this->result = $this->processResult($options);
         } else {
