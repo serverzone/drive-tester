@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Event;
 
-use App\Command\ICommand;
+use App\Command\IDispatcherCommand;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
@@ -12,7 +12,7 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class CommandEvent extends Event
 {
-    /** @var ICommand Command */
+    /** @var IDispatcherCommand Command */
     private $command;
 
     /** @var Array Event options */
@@ -21,10 +21,10 @@ class CommandEvent extends Event
     /**
      * Class constructor.
      *
-     * @param ICommand $command Command
+     * @param IDispatcherCommand $command Command
      * @param array $options Event options
      */
-    public function __construct(ICommand $command, array $options = [])
+    public function __construct(IDispatcherCommand $command, array $options = [])
     {
         $this->command = $command;
         $this->options = $options;
@@ -33,9 +33,9 @@ class CommandEvent extends Event
     /**
      * Return command.
      *
-     * @return ICommand
+     * @return IDispatcherCommand
      */
-    public function getCommand(): ICommand
+    public function getCommand(): IDispatcherCommand
     {
         return $this->command;
     }

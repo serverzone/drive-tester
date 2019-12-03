@@ -6,6 +6,8 @@ namespace Tests;
 
 use App\Checker\Checker;
 use App\Checker\CheckerFactory;
+use App\Checker\Status;
+use Symfony\Component\Console\Output\NullOutput;
 use Tester\Assert;
 use Nette\DI\Container;
 use Contributte\Console\Application;
@@ -51,7 +53,7 @@ class DriveTesterCommandTest extends \Tester\TestCase
      *
      * @dataProvider TestCommand.ini
      * @return void
-     *
+     */
     public function testRun(array $drives, array $statusesJson, string $count, $notifyMessage): void
     {
         $statuses = [];
@@ -60,40 +62,29 @@ class DriveTesterCommandTest extends \Tester\TestCase
         }
 
         $input = new StringInput(implode(' ', $drives));
-        $output = new ConsoleOutput();
 
         // prepare mockers
         $driveDiscoveryCmd = Mockery::mock(DriveDiscoveryCommand::class, [
-            'detectSystemDrive' => '/dev/sdxxx',
+            'detectSystemDrives' => ['/dev/sdxxx'],
         ]);
-        $checker = Mockery::mock(
-            Checker::class,
-            [
+        $checkerFactory = Mockery::mock(CheckerFactory::class, [
+            'create' => Mockery::mock(Checker::class, [
                 'run' => null,
-            ]
-        );
-        $checkerFactory = Mockery::mock(
-            CheckerFactory::class,
-            [
-                'create' => $checker,
-            ]
-        );
+            ]),
+        ]);
         $dispatcher = Mockery::mock(EventDispatcher::class);
-        $dispatcher->shouldReceive('dispatch')
-            ->with(\Mockery::on(function ($argument) use ($notifyMessage) {
-                return $argument->getMessage() == $notifyMessage;
-            }));
+        $dispatcher->shouldReceive('dispatch');
 
         // run command
-        $cmd = new TestCommand($driveDiscoveryCmd, $checkerFactory, $dispatcher);
-        Assert::same(intval($count), $cmd->run($input, $output));
+        $cmd = new TestCommand($driveDiscoveryCmd, $checkerFactory, $this->cache, $dispatcher);
+        Assert::same(intval($count), $cmd->run($input, new ConsoleOutput()));
     }
 
     /**
      * Run with drive auto detection test.
      *
      * @return void
-     *
+     */
     public function testRunWithAutoDetection(): void
     {
         $output = new ConsoleOutput();
@@ -101,15 +92,20 @@ class DriveTesterCommandTest extends \Tester\TestCase
         // prepare mockers
         $driveDiscoveryCmd = Mockery::mock(DriveDiscoveryCommand::class, [
             'detectDrives' => ['/dev/sda', '/dev/sdb', '/dev/sdc'],
-            'detectSystemDrive' => '/dev/sda',
+            'detectSystemDrives' => ['/dev/sda'],
+        ]);
+        $checkerFactory = Mockery::mock(CheckerFactory::class, [
+            'create' => Mockery::mock(Checker::class, [
+                'run' => null,
+            ]),
         ]);
         $dispatcher = Mockery::mock(EventDispatcher::class);
         $dispatcher->shouldReceive('dispatch');
 
         // run command
-        $cmd = new TestCommand($driveDiscoveryCmd, $dispatcher);
-        Assert::same(0, $cmd->run(new StringInput('-a'), $output));
-    } */
+        $cmd = new TestCommand($driveDiscoveryCmd, $checkerFactory, $this->cache, $dispatcher);
+        Assert::same(0, $cmd->run(new StringInput('-a'), new ConsoleOutput()));
+    }
 
     /**
      * Run command on system drive test.
@@ -125,20 +121,10 @@ class DriveTesterCommandTest extends \Tester\TestCase
 
         // prepare mockers
         $driveDiscoveryCmd = Mockery::mock(DriveDiscoveryCommand::class, [
-            'detectSystemDrive' => $drive,
+            'detectSystemDrives' => [$drive, '/dev/sdddd'],
         ]);
-        $checker = Mockery::mock(
-            Checker::class,
-            [
-                'run' => null,
-            ]
-        );
-        $checkerFactory = Mockery::mock(
-            CheckerFactory::class,
-            [
-                'create' => $checker,
-            ]
-        );
+        $checker = Mockery::mock(Checker::class, ['run' => null,]);
+        $checkerFactory = Mockery::mock(CheckerFactory::class, ['create' => $checker,]);
         $dispatcher = Mockery::mock(EventDispatcher::class);
 
         // run command
@@ -153,9 +139,13 @@ class DriveTesterCommandTest extends \Tester\TestCase
      */
     public function testRunWithoutArguments(): void
     {
-        $this->application->setDefaultCommand('drive:test', true);
-        $this->application->setAutoExit(false);
-        Assert::same(-1, $this->application->run());
+        $driveDiscoveryCmd = Mockery::mock(DriveDiscoveryCommand::class, ['detectSystemDrives' => ['/dev/sdx']]);
+        $checker = Mockery::mock(Checker::class);
+        $checkerFactory = Mockery::mock(CheckerFactory::class);
+        $dispatcher = Mockery::mock(EventDispatcher::class);
+
+        $cmd = new TestCommand($driveDiscoveryCmd, $checkerFactory, $this->cache, $dispatcher);
+        Assert::same(-1, $cmd->run(new StringInput(''), new ConsoleOutput()));
     }
 }
 

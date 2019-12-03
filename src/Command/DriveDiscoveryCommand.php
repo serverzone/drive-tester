@@ -4,11 +4,30 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Process\IProcessFactory;
+use Contributte\Utils\Strings;
+use Psr\Log\LoggerInterface;
+
 /**
  * Drive detector command.
  */
 class DriveDiscoveryCommand extends BaseCommand
 {
+    /** @var MdadmCommand Mdadm command */
+    private $mdadmCmd;
+
+    /**
+     * Class constructor.
+     *
+     * @param IProcessFactory $processFactory Process factory
+     * @param LoggerInterface $logger Logger
+     * @param MdadmCommand $mdadmCmd Mdadm command
+     */
+    public function __construct(IProcessFactory $processFactory, LoggerInterface $logger, MdadmCommand $mdadmCmd)
+    {
+        parent::__construct($processFactory, $logger);
+        $this->mdadmCmd = $mdadmCmd;
+    }
 
     /**
      * Detect all drives.
@@ -17,22 +36,34 @@ class DriveDiscoveryCommand extends BaseCommand
      */
     public function detectDrives(): array
     {
-        $process = $this->runCommand(['/sbin/fdisk', '-l']);
-        preg_match_all('#Disk (/dev/sd[a-z]+):#', $process->getOutput(), $matches);
+        $result = $this->runCommand(['/sbin/fdisk', '-l']);
+        preg_match_all('#Disk (/dev/sd[a-z]+):#', $result, $matches);
 
         return $matches[1];
     }
 
     /**
-     * Detect system drive.
+     * Detect system drive(s).
      *
-     * @return string|null
+     * @return array
      */
-    public function detectSystemDrive(): ?string
+    public function detectSystemDrives(): array
     {
-        $process = $this->runCommand(['/bin/df', '/']);
-        preg_match_all('#/dev/sd[a-z]+#', $process->getOutput(), $matches);
+        $result = $this->runCommand(['/bin/df', '/']);
+        preg_match_all('#/dev/(sd[a-z]+|md[0-9])#', $result, $matches);
+        $drive = $matches[0][0] ?? null;
 
-        return $matches[0][0] ?? null;
+        if ($drive === null) {
+            return [];
+        }
+
+        if (Strings::startsWith($drive, '/dev/md')) {
+            $detail = $this->mdadmCmd->queryDetail($drive);
+            preg_match_all('#/dev/sd[a-z]+#', $detail, $matches);
+
+            return $matches[0];
+        }
+
+        return [$drive];
     }
 }

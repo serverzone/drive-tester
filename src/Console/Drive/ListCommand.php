@@ -62,7 +62,7 @@ class ListCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $drives = $this->driveDiscoveryCmd->detectDrives();
-        $systemDrivePath = $this->driveDiscoveryCmd->detectSystemDrive();
+        $systemDrives = $this->driveDiscoveryCmd->detectSystemDrives();
 
         $table = new Table($output);
         $table->setHeaders(['Device path', 'Rotates', 'Status', 'Serial number']);
@@ -73,7 +73,7 @@ class ListCommand extends Command
             $locker = (new FileLockFactory())->create($path);
 
             $status = '<fg=green>Ready</>';
-            if ($path === $systemDrivePath) {
+            if (in_array($path, $systemDrives, true)) {
                 $status = '<fg=red>System</>';
             } else if ($locker->acquire(false) === false) {
                 $status = '<fg=yellow>Testing</>';

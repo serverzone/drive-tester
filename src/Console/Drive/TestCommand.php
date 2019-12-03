@@ -82,18 +82,18 @@ class TestCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $systemDrive = $this->driveDiscoveryCmd->detectSystemDrive();
+        $systemDrives = $this->driveDiscoveryCmd->detectSystemDrives();
 
         /** @var array */
         $paths = $input->getArgument('drives');
-        if (in_array($systemDrive, $paths, true)) {
-            $output->writeln(sprintf('Cannot run on system disk %s!', $systemDrive));
+        if (count(array_intersect($systemDrives, $paths)) > 0) {
+            $output->writeln('Cannot run on system drive!');
             return -2;
         }
 
         // auto detect drives
         if ($input->getOption('auto-detect') === true) {
-            $detectedDrives = array_diff($this->driveDiscoveryCmd->detectDrives(), [$systemDrive]);
+            $detectedDrives = array_diff($this->driveDiscoveryCmd->detectDrives(), $systemDrives);
             $paths = array_merge($paths, $detectedDrives);
         }
 
@@ -106,8 +106,8 @@ class TestCommand extends Command
         }
 
         // run test
-        $sections = $this->createOutputSections($paths, $output);
         $output->writeln('Drive tester result:');
+        $sections = $this->createOutputSections($paths, $output);
         $statuses = $this->runTests($paths, $sections);
 
         // send event

@@ -9,7 +9,7 @@ use App\Process\Process;
 /**
  * Command interface.
  */
-interface ICommand
+interface IDispatcherCommand
 {
 
     /**
@@ -18,4 +18,11 @@ interface ICommand
      * @return Process
      */
     public function getProcess(): Process;
+
+    /**
+     * Return command result.
+     *
+     * @return mixed
+     */
+    public function getResult();
 }

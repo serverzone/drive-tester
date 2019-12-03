@@ -55,13 +55,30 @@ class DriveDiscoveryCommandTest extends \Tester\TestCase
      * @dataProvider DriveDiscoveryCommand_DetectSystemDrive.ini
      *
      * @param string $output Command output
-     * @param string|null $drive Detected system drive
+     * @param array $drives Detected system drives
      * @return void
      */
-    public function testDetectSystemDrive(string $output, ?string $drive = null): void
+    public function testDetectSystemDrive(string $output, array $drives = []): void
     {
         $this->processFactory->addCommand(['/bin/echo', $output]);
-        Assert::same($drive, $this->driveDiscoveryCmd->detectSystemDrive());
+        Assert::equal($drives, $this->driveDiscoveryCmd->detectSystemDrives());
+    }
+
+    /**
+     * Detect system drives test.
+     *
+     * @dataProvider DriveDiscoveryCommand_DetectSystemDrives.ini
+     *
+     * @param string $fdisk Fdisk output
+     * @param string $mdadm Mdadm output
+     * @param string[] $drives Detected system drives
+     * @return void
+     */
+    public function testDetectSystemDrives(string $fdisk, string $mdadm, array $drives): void
+    {
+        $this->processFactory->addCommand(['/bin/echo', $fdisk]);
+        $this->processFactory->addCommand(['/bin/echo', $mdadm]);
+        Assert::equal($drives, $this->driveDiscoveryCmd->detectSystemDrives());
     }
 
     /**
@@ -73,7 +90,7 @@ class DriveDiscoveryCommandTest extends \Tester\TestCase
     public function testCommandExitCode(): void
     {
         $this->processFactory->addCommand(['/bin/bash', '-c', 'exit 1']);
-        $this->driveDiscoveryCmd->detectSystemDrive();
+        $this->driveDiscoveryCmd->detectSystemDrives();
     }
 
     /**
@@ -85,7 +102,7 @@ class DriveDiscoveryCommandTest extends \Tester\TestCase
     public function testCommandNotFound(): void
     {
         $this->processFactory->addCommand(['dddd']);
-        $this->driveDiscoveryCmd->detectSystemDrive();
+        $this->driveDiscoveryCmd->detectSystemDrives();
     }
 }
 
