@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Console\Drive;
 
+use App\Command\DriveDiscoveryCommand;
+use App\Command\GetSerialNumberCommand;
+use App\Console\Drive\ListCommand;
+use Mockery;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Tester\Assert;
-use Nette\DI\Container;
-use Contributte\Console\Application;
 
 $container = require __DIR__ . '/../../bootstrap.php';
 
@@ -15,28 +19,21 @@ $container = require __DIR__ . '/../../bootstrap.php';
  */
 class ListCommandTest extends \Tester\TestCase
 {
-
-    /** @var Application Console application */
-    private $application;
-
-    /**
-     * Class constructor.
-     *
-     * @param Containter $containter Nette DI container
-     */
-    public function __construct(Container $container)
-    {
-        $this->application = $container->getByType('Contributte\Console\Application');
-    }
-
     /**
      * Run command test.
      */
     public function testRun(): void
     {
-        $this->application->setDefaultCommand('drive:list', true);
-        $this->application->setAutoExit(false);
-        Assert::same(0, $this->application->run());
+        $driveDiscoveryCmd = Mockery::mock(DriveDiscoveryCommand::class, [
+            'detectDrives' => ['/dev/sda', '/dev/sdb'],
+            'detectSystemDrives' => ['/dev/sda'],
+        ]);
+        $getSerialNumberCmd = Mockery::mock(GetSerialNumberCommand::class, [
+            'getSerialNumber' => 'serial number',
+        ]);
+
+        $cmd = new ListCommand($driveDiscoveryCmd, $getSerialNumberCmd);
+        Assert::same(0, $cmd->run(new StringInput(''), new ConsoleOutput()));
     }
 }
 

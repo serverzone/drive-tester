@@ -112,6 +112,6 @@ abstract class BaseCommand
      */
     protected function processResult(array $options = [])
     {
-        return $this->isSuccessful() ? $this->process->getOutput() : null;
+        return $this->process->getOutput();
     }
 }
