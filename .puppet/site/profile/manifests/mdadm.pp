@@ -15,6 +15,11 @@ class profile::mdadm inherits ::profile::base {
         lens    => 'Mdadm_conf.lns',
         changes => 'set auto/- all',
         require => Package['mdadm'],
+        notify  => Exec['update-initramfs'],
+    }
+
+    exec { 'update-initramfs':
+        command => '/usr/sbin/update-initramfs -u',
     }
 
 }
