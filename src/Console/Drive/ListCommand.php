@@ -20,6 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ListCommand extends Command
 {
+    const SUMMATY_FORMAT = 'Summary: %d total drives, %d system drives, %d test drives';
+
     /** @var string  Command default name */
     protected static $defaultName = 'drive:list';
 
@@ -93,6 +95,9 @@ class ListCommand extends Command
             ]);
         }
         $table->render();
+
+        $output->writeln('');
+        $output->writeln(sprintf(self::SUMMATY_FORMAT, count($drives), count($systemDrives), count($drives) - count($systemDrives)));
 
         return 0;
     }
