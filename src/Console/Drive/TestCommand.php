@@ -82,33 +82,38 @@ class TestCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $systemDrives = $this->driveDiscoveryCmd->detectSystemDrives();
+        /** @var array $drives */
+        $drives = $input->getArgument('drives');
+        if ($this->validateDrives($drives) === false) {
+            $output->writeln('Invalid drive path or not exists!');
+            return 3;
+        }
 
-        /** @var array */
-        $paths = $input->getArgument('drives');
-        if (count(array_intersect($systemDrives, $paths)) > 0) {
+        // detect system drives
+        $systemDrives = $this->driveDiscoveryCmd->detectSystemDrives();
+        if (count(array_intersect($systemDrives, $drives)) > 0) {
             $output->writeln('Cannot run on system drive!');
-            return -2;
+            return 2;
         }
 
         // auto detect drives
         if ($input->getOption('auto-detect') === true) {
             $detectedDrives = array_diff($this->driveDiscoveryCmd->detectDrives(), $systemDrives);
-            $paths = array_merge($paths, $detectedDrives);
+            $drives = array_merge($drives, $detectedDrives);
         }
 
-        $paths = array_unique($paths, SORT_STRING);
-        if (count($paths) == 0) {
+        $drives = array_unique($drives, SORT_STRING);
+        if (count($drives) == 0) {
             $help = new HelpCommand();
             $help->setCommand($this);
             $help->run($input, $output);
-            return -1;
+            return 1;
         }
 
         // run test
         $output->writeln('Drive tester result:');
-        $sections = $this->createOutputSections($paths, $output);
-        $statuses = $this->runTests($paths, $sections);
+        $sections = $this->createOutputSections($drives, $output);
+        $statuses = $this->runTests($drives, $sections);
 
         // send event
         $this->dispatcher->dispatch(new ConsoleDriveTestCommandEvent($statuses));
@@ -153,7 +158,7 @@ class TestCommand extends Command
             usleep(500000);
             foreach ($processes as $path => $process) {
                 // update status
-                $status = $this->cache->getStatus((string) $path);
+                $status = $this->cache->getStatus((string)$path);
                 if ($status !== null) {
                     $statuses[$path] = $status;
                     if (isset($sections[$path])) {
@@ -192,5 +197,25 @@ class TestCommand extends Command
         }
 
         return $processes;
+    }
+
+    /**
+     * Validate drives.
+     *
+     * @param string[] $drives Drives paths
+     * @return bool
+     */
+    protected function validateDrives(array $drives): bool
+    {
+        foreach ($drives as $drive) {
+            if (preg_match('#/dev/sd[a-z]+#', $drive) !== 1) {
+                return false;
+            }
+            if (file_exists($drive) === false) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

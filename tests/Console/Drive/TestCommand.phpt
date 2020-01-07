@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests;
+namespace Tests\Console\Drive;
 
 use App\Checker\Checker;
 use App\Checker\CheckerFactory;
@@ -129,7 +129,30 @@ class DriveTesterCommandTest extends \Tester\TestCase
 
         // run command
         $cmd = new TestCommand($driveDiscoveryCmd, $checkerFactory, $this->cache, $dispatcher);
-        Assert::same(-2, $cmd->run($input, $output));
+        Assert::same(2, $cmd->run($input, $output));
+    }
+
+    /**
+     * Run command on invalid drive path test.
+     *
+     * @return void
+     */
+    public function testRunCommandInvalidDrivePath(): void
+    {
+        $drive = '/foo';
+
+        $input = new StringInput(implode(' ', [$drive]));
+        $output = new ConsoleOutput();
+
+        // prepare mockers
+        $driveDiscoveryCmd = Mockery::mock(DriveDiscoveryCommand::class);
+        $checker = Mockery::mock(Checker::class);
+        $checkerFactory = Mockery::mock(CheckerFactory::class, ['create' => $checker,]);
+        $dispatcher = Mockery::mock(EventDispatcher::class);
+
+        // run command
+        $cmd = new TestCommand($driveDiscoveryCmd, $checkerFactory, $this->cache, $dispatcher);
+        Assert::same(3, $cmd->run($input, $output));
     }
 
     /**
@@ -145,9 +168,22 @@ class DriveTesterCommandTest extends \Tester\TestCase
         $dispatcher = Mockery::mock(EventDispatcher::class);
 
         $cmd = new TestCommand($driveDiscoveryCmd, $checkerFactory, $this->cache, $dispatcher);
-        Assert::same(-1, $cmd->run(new StringInput(''), new ConsoleOutput()));
+        Assert::same(1, $cmd->run(new StringInput(''), new ConsoleOutput()));
     }
 }
 
 $test = new DriveTesterCommandTest($container);
 $test->run();
+
+namespace App\Console\Drive;
+
+/**
+ * Mock php function file_exists.
+ *
+ * @param string $path
+ * @return bool
+ */
+function file_exists(string $path): bool
+{
+    return true;
+}
