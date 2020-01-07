@@ -55,7 +55,7 @@ class SharedStatusCache
 
         if ($this->cache->has($path)) {
             $json = $this->cache->get($path);
-            if ($json !== null) {
+            if (is_string($json)) {
                 $status = Status::fromJsonString($json);
             }
             $this->cache->delete($path);
