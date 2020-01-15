@@ -51,9 +51,9 @@ abstract class DispatchedCommand extends BaseCommand implements IDispatcherComma
      * @param array $command Command
      * @param int $timeout Command timeout
      * @param array $options Options
-     * @return Process
+     * @return mixed
      */
-    protected function runCommand(array $command, int $timeout = 120, array $options = []): Process
+    protected function runCommand(array $command, int $timeout = 120, array $options = [])
     {
         $this->runProcess($command, $timeout);
 

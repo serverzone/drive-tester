@@ -7,7 +7,7 @@ namespace App\Command;
 /**
  * Bad blocks command.
  */
-class BadblocksCommand extends BaseCommand
+class BadblocksCommand extends DispatchedCommand
 {
     /**
      * Detect bad blocks on drive.

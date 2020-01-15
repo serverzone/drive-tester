@@ -9,7 +9,7 @@ use RuntimeException;
 /**
  * Get SMART ctl command.
  */
-class SmartCtlCommand extends BaseCommand
+class SmartCtlCommand extends DispatchedCommand
 {
 
     /**

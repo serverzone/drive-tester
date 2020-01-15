@@ -7,7 +7,7 @@ namespace App\Command;
 /**
  * Parted command.
  */
-class PartedCommand extends BaseCommand
+class PartedCommand extends DispatchedCommand
 {
 
     /**

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\DriveTester;
 
-use Faker;
-use Tester\Assert;
-use Nette\DI\Container;
 use App\Command\SmartCtlCommand;
 use App\Process\MockProcessFactory;
-use Tester\Expect;
+use Faker;
+use Mockery;
+use Nette\DI\Container;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Tester\Assert;
 
 $container = require __DIR__ . '/../bootstrap.php';
 
@@ -18,11 +20,11 @@ $container = require __DIR__ . '/../bootstrap.php';
  */
 class SmartCtlCommandTest extends \Tester\TestCase
 {
-    /** @var SmartCtlCommand SMART ctl command */
-    private $smartCtlCmd;
-
     /** @var MockProcessFactory Process factory */
     private $processFactory;
+
+    /** @var LoggerInterface Logger interface */
+    private $logger;
 
     /** @var Faker Faker */
     private $faker;
@@ -34,9 +36,17 @@ class SmartCtlCommandTest extends \Tester\TestCase
      */
     public function __construct(Container $container)
     {
-        $this->smartCtlCmd = $container->getByType('App\Command\SmartCtlCommand');
         $this->processFactory = $container->getService('ProcessFactory');
+        $this->logger = $container->getByType('Psr\Log\LoggerInterface');
         $this->faker = Faker\Factory::create();
+    }
+
+    /**
+     * Tear down test.
+     */
+    protected function tearDown()
+    {
+        Mockery::close();
     }
 
     /**
@@ -48,19 +58,19 @@ class SmartCtlCommandTest extends \Tester\TestCase
     {
         $output = $this->faker->text;
         $this->processFactory->addCommand(['/bin/echo', $output]);
-        Assert::same($output, $this->smartCtlCmd->getInfo('/dev/sdb'));
+        Assert::same($output, $this->createCommad()->getInfo('/dev/sdb'));
     }
 
     /**
      * Command not found test.
      *
-     * @throws \App\Process\ProcessFailedException
      * @return void
+     * @throws \App\Process\ProcessFailedException
      */
     public function testCommandNotFound(): void
     {
         $this->processFactory->addCommand(['dddd']);
-        $this->smartCtlCmd->getInfo('/dev/sdb');
+        $this->createCommad()->getInfo('/dev/sdb');
     }
 
     /**
@@ -72,7 +82,7 @@ class SmartCtlCommandTest extends \Tester\TestCase
     {
         for ($exitCode = 1; $exitCode < 256; $exitCode += 2) {
             $this->processFactory->addCommand(['/bin/bash', '-c', 'exit ' . $exitCode]);
-            $smartCtlCmd = $this->smartCtlCmd;
+            $smartCtlCmd = $this->createCommad();
             Assert::exception(function () use ($smartCtlCmd) {
                 $smartCtlCmd->getInfo('/dev/sdb');
             }, \App\Process\ProcessFailedException::class);
@@ -80,8 +90,21 @@ class SmartCtlCommandTest extends \Tester\TestCase
 
         for ($exitCode = 0; $exitCode < 256; $exitCode += 2) {
             $this->processFactory->addCommand(['/bin/bash', '-c', 'exit ' . $exitCode]);
-            $this->smartCtlCmd->getInfo('/dev/sdb');
+            $this->createCommad()->getInfo('/dev/sdb');
         }
+    }
+
+    /**
+     * Create smartCtl command.
+     *
+     * @return SmartCtlCommand
+     */
+    protected function createCommad(): SmartCtlCommand
+    {
+        $eventDispatcher = Mockery::mock(EventDispatcherInterface::class);
+        $eventDispatcher->shouldReceive('dispatch')->once();
+
+        return new SmartCtlCommand($this->processFactory, $this->logger, $eventDispatcher);
     }
 }
 
