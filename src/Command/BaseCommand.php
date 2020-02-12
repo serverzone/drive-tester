@@ -1,14 +1,13 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Command;
 
 use App\Process\IProcessFactory;
-use Psr\Log\LoggerInterface;
 use App\Process\Process;
 use App\Process\ProcessFailedException;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Symfony\Component\Process\Exception\ProcessSignaledException;
 
 /**
  * Abstract base command.
@@ -43,6 +42,10 @@ abstract class BaseCommand
      */
     public function getProcess(): Process
     {
+        if ($this->process == null) {
+            throw new RuntimeException('No process has been executed yet');
+        }
+
         return $this->process;
     }
 

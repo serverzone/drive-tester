@@ -12,6 +12,7 @@ use App\Process\ProcessFailedException;
 use Contributte\Utils\DateTime;
 use Jenner\SimpleFork\Runnable;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Process\Exception\ProcessSignaledException;
 
 /**
  * Drive checker.
@@ -98,7 +99,7 @@ class Checker implements Runnable
             }
 
             $this->updateStatus($status, 'OK', Status::STATE_DONE);
-        } catch (ProcessFailedException | DriveException $ex) {
+        } catch (ProcessFailedException | DriveException | ProcessSignaledException $ex) {
             $this->updateStatus($status, $ex->getMessage(), Status::STATE_ERROR);
         }
 

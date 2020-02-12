@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Process;
 
@@ -27,9 +25,9 @@ class Process extends SymfonyProcess
     /**
      * Return process running time.
      *
-     * @return float
+     * @return float|null
      */
-    public function getRunningTime(): float
+    public function getRunningTime(): ?float
     {
         return $this->runningTime;
     }
