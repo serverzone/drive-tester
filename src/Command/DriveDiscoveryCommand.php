@@ -6,6 +6,7 @@ namespace App\Command;
 
 use App\Process\IProcessFactory;
 use Contributte\Utils\Strings;
+use DirectoryIterator;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -36,10 +37,9 @@ class DriveDiscoveryCommand extends BaseCommand
      */
     public function detectDrives(): array
     {
-        $result = $this->runCommand(['/sbin/fdisk', '-l']);
-        preg_match_all('#Disk (/dev/sd[a-z]+):#', $result, $matches);
+        $result = $this->runCommand(['/bin/ls', '-U', '/dev']);
 
-        return $matches[1];
+        return array_values(preg_grep('#sd[a-z]+$#', explode(PHP_EOL, $result)));
     }
 
     /**
