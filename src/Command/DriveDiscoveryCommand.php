@@ -37,7 +37,7 @@ class DriveDiscoveryCommand extends BaseCommand
      */
     public function detectDrives(): array
     {
-        $result = $this->runCommand(['/bin/ls', '-U', '/dev']);
+        $result = $this->runCommand(['/usr/bin/find', '/dev/', '-maxdepth', '1']);
 
         return array_values(preg_grep('#sd[a-z]+$#', explode(PHP_EOL, $result)));
     }
