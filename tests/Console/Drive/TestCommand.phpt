@@ -1,27 +1,26 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tests\Console\Drive;
 
 use App\Checker\Checker;
 use App\Checker\CheckerFactory;
 use App\Checker\Status;
-use Symfony\Component\Console\Output\NullOutput;
-use Tester\Assert;
-use Nette\DI\Container;
-use Contributte\Console\Application;
-use Symfony\Component\Console\Input\StringInput;
-use Mockery;
 use App\Command\DriveDiscoveryCommand;
 use App\Console\Drive\TestCommand;
+use Contributte\Console\Application;
+use Mockery;
+use Nette\DI\Container;
+use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Tester\Assert;
 
 $container = require __DIR__ . '/../../bootstrap.php';
 
 /**
  * Drive tester console command test.
+ *
+ * @testCase
  */
 class DriveTesterCommandTest extends \Tester\TestCase
 {
@@ -43,6 +42,9 @@ class DriveTesterCommandTest extends \Tester\TestCase
         $this->cache = $container->getByType('App\Checker\SharedStatusCache');
     }
 
+    /**
+     * Tear down.
+     */
     public function tearDown(): void
     {
         Mockery::close();
@@ -130,6 +132,39 @@ class DriveTesterCommandTest extends \Tester\TestCase
         // run command
         $cmd = new TestCommand($driveDiscoveryCmd, $checkerFactory, $this->cache, $dispatcher);
         Assert::same(2, $cmd->run($input, $output));
+    }
+
+    /**
+     * Run command test.
+     *
+     * @dataProvider TestCommand.ini
+     * @return void
+     */
+    public function testRunWithForceSddWrites(array $drives, array $statusesJson, string $count, $notifyMessage): void
+    {
+        $statuses = [];
+        foreach ($statusesJson as $key => $json) {
+            $statuses[$key] = Status::fromJsonString($json);
+        }
+
+        $input = new StringInput(implode(' ', $drives) . ' --force-ssd-writes');
+
+        // prepare mockers
+        $driveDiscoveryCmd = Mockery::mock(DriveDiscoveryCommand::class, [
+            'detectSystemDrives' => ['/dev/sdxxx'],
+        ]);
+        $checkerFactory = Mockery::mock(CheckerFactory::class);
+        $checkerFactory->shouldReceive('create')
+            ->with(Mockery::any(), true)
+            ->andReturn(Mockery::mock(Checker::class, [
+                'run' => null,
+            ]));
+        $dispatcher = Mockery::mock(EventDispatcher::class);
+        $dispatcher->shouldReceive('dispatch');
+
+        // run command
+        $cmd = new TestCommand($driveDiscoveryCmd, $checkerFactory, $this->cache, $dispatcher);
+        Assert::same(intval($count), $cmd->run($input, new ConsoleOutput()));
     }
 
     /**

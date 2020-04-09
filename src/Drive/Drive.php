@@ -1,15 +1,13 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Drive;
 
-use Contributte\Utils\Strings;
 use App\Command\BadblocksCommand;
+use App\Command\FstrimCommand;
 use App\Command\GetSerialNumberCommand;
 use App\Command\PartedCommand;
 use App\Command\SmartCtlCommand;
-use App\Command\FstrimCommand;
+use Contributte\Utils\Strings;
 
 /**
  * Drive
@@ -44,6 +42,7 @@ class Drive
      * Return if it is rotate drive.
      *
      * @return boolean
+     * @throws DriveException
      */
     public static function isRotate(string $path): bool
     {
@@ -64,6 +63,7 @@ class Drive
      * @param SmartCtlCommand $smartCtlCmd Smartctl command
      * @param BadblocksCommand $badblocksCmd Detect bad blocks command
      * @param FstrimCommand $fstrimCmd Fstrim command
+     * @throws DriveException
      */
     public function __construct(string $path, GetSerialNumberCommand $serialNoCmd, PartedCommand $partedCmd, SmartCtlCommand $smartCtlCmd, BadblocksCommand $badblocksCmd, FstrimCommand $fstrimCmd)
     {
@@ -115,18 +115,20 @@ class Drive
     /**
      * Detect bad block on drive.
      *
+     * @param bool $writeMode Enable write mode flag
      * @param array $eventOptions Event options
      * @return integer
      */
-    public function badblocks(array $eventOptions = []): int
+    public function badblocks(bool $writeMode = false, array $eventOptions = []): int
     {
-        return $this->badblocksCmd->detect($this->path, $eventOptions);
+        return $this->badblocksCmd->detect($this->path, $writeMode, $eventOptions);
     }
 
     /**
      * Return if drive is SSD.
      *
      * @return boolean
+     * @throws DriveException
      */
     public function isSsd(): bool
     {

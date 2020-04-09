@@ -28,7 +28,7 @@ class DetectBadBlocksCommandTest extends \Tester\TestCase
     /**
      * Class constructor.
      *
-     * @param Containter $containter Nette DI container
+     * @param Container $container
      */
     public function __construct(Container $container)
     {
@@ -47,8 +47,6 @@ class DetectBadBlocksCommandTest extends \Tester\TestCase
     /**
      * Detect bad blocks test.
      *
-     * @param string $output Command output
-     * @param int $count Bad blocks counter
      * @return void
      */
     public function testDetectBadBlocks(): void
@@ -68,7 +66,7 @@ class DetectBadBlocksCommandTest extends \Tester\TestCase
      * Command exit code test.
      *
      * @return void
-     * @throws \App\Process\ProcessFailedException
+     * @throws App\Process\ProcessFailedException
      */
     public function testCommandExitCode(): void
     {
@@ -80,7 +78,7 @@ class DetectBadBlocksCommandTest extends \Tester\TestCase
      * Command not found test.
      *
      * @return void
-     * @throws \App\Process\ProcessFailedException
+     * @throws App\Process\ProcessFailedException
      */
     public function testCommandNotFound(): void
     {

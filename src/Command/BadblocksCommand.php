@@ -13,12 +13,13 @@ class BadblocksCommand extends DispatchedCommand
      * Detect bad blocks on drive.
      *
      * @param string $path Drive path (e.g. '/dev/sdb')
+     * @param bool $writeMode Enable write mode flag
      * @param array $eventOptions Event options
      * @return integer
      */
-    public function detect(string $path, array $eventOptions = []): int
+    public function detect(string $path, bool $writeMode = false, array $eventOptions = []): int
     {
-        return $this->runCommand(['/sbin/badblocks',  '-wve150', '-b8192', '-c8192', $path], 10 * 24 * 3600, $eventOptions);
+        return $this->runCommand(['/sbin/badblocks', $writeMode ? '-w' : '', '-v', '-e150', '-b8192', '-c8192', $path], 10 * 24 * 3600, $eventOptions);
     }
 
     /**
