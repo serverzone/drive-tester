@@ -54,12 +54,14 @@ class DetectBadBlocksCommandTest extends \Tester\TestCase
         $faker = Faker\Factory::create();
         $output = $faker->text;
         $this->processFactory->addCommand(['/bin/echo', $output]);
-        Assert::same(-1, $cmd = $this->createCommad()->detect('/dev/sdb'));
+        Assert::same(-1, $cmd = $this->createCommad()->detect('/dev/sdb', true));
+        Assert::same(['/sbin/badblocks', '-v', '-e150', '-b8192', '-c8192', '-w', '/dev/sdb'], $this->processFactory->getOriginalCommand());
 
         $badBlocks = rand(10, 1024);
         $output = sprintf('Pass completed, %d bad blocks found.', $badBlocks);
         $this->processFactory->addCommand(['/bin/echo', $output]);
-        Assert::same($badBlocks, $this->createCommad()->detect('/dev/sdb'));
+        Assert::same($badBlocks, $this->createCommad()->detect('/dev/sdb', false));
+        Assert::same(['/sbin/badblocks', '-v', '-e150', '-b8192', '-c8192', '/dev/sdb'], $this->processFactory->getOriginalCommand());
     }
 
     /**
@@ -70,8 +72,8 @@ class DetectBadBlocksCommandTest extends \Tester\TestCase
      */
     public function testCommandExitCode(): void
     {
-        $this->processFactory->addCommand(['/bin/bash', '-c', 'exit 1']);
-        $this->createCommad()->detect('/dev/sdb');
+        $this->processFactory->addCommand([' / bin / bash', ' - c', 'exit 1']);
+        $this->createCommad()->detect(' / dev / sdb');
     }
 
     /**
@@ -83,7 +85,7 @@ class DetectBadBlocksCommandTest extends \Tester\TestCase
     public function testCommandNotFound(): void
     {
         $this->processFactory->addCommand(['dddd']);
-        $this->createCommad()->detect('/dev/sdb');
+        $this->createCommad()->detect(' / dev / sdb');
     }
 
     /**

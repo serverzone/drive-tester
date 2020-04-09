@@ -19,7 +19,13 @@ class BadblocksCommand extends DispatchedCommand
      */
     public function detect(string $path, bool $writeMode = false, array $eventOptions = []): int
     {
-        return $this->runCommand(['/sbin/badblocks', $writeMode ? '-w' : '', '-v', '-e150', '-b8192', '-c8192', $path], 10 * 24 * 3600, $eventOptions);
+        $command = ['/sbin/badblocks', '-v', '-e150', '-b8192', '-c8192'];
+        if ($writeMode) {
+            $command[] = '-w';
+        }
+        $command[] = $path;
+
+        return $this->runCommand($command, 10 * 24 * 3600, $eventOptions);
     }
 
     /**

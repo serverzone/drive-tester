@@ -12,6 +12,9 @@ class MockProcessFactory implements IProcessFactory
     /** @var array Mocked commands */
     private $commands = [];
 
+    /** @var array  Original command */
+    private $originalCommand = [];
+
     /**
      * Create new process.
      *
@@ -20,6 +23,8 @@ class MockProcessFactory implements IProcessFactory
      */
     public function create(array $command): Process
     {
+        $this->originalCommand = $command;
+
         return new Process(array_shift($this->commands));
     }
 
@@ -32,5 +37,15 @@ class MockProcessFactory implements IProcessFactory
     public function addCommand(array $command): void
     {
         $this->commands[] = $command;
+    }
+
+    /**
+     * Return original command.
+     *
+     * @return array
+     */
+    public function getOriginalCommand(): array
+    {
+        return $this->originalCommand;
     }
 }
