@@ -53,6 +53,7 @@ final class FileStorage implements EventSubscriberInterface
             $storeDir = sprintf('%s/%s/%s/', $this->storeDirPrefix, $event->getOption('serialNumber'), $event->getOption('startedAt')->format('Ymd-His'));
             FileSystem::createDir($storeDir);
 
+            file_put_contents($storeDir . $filename . '.cmd', $process->getCommandLine());
             file_put_contents($storeDir . $filename . '.stdout', $process->getOutput());
             file_put_contents($storeDir . $filename . '.stderr', $process->getErrorOutput());
             file_put_contents($storeDir . $filename . '.exitcode', $process->getExitCode());
