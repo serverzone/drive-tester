@@ -7,6 +7,7 @@ namespace App\Console\Drive;
 use App\Checker\CheckerFactory;
 use App\Checker\SharedStatusCache;
 use App\Command\DriveDiscoveryCommand;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\HelpCommand;
@@ -42,6 +43,8 @@ class TestCommand extends Command
     /** @var EventDispatcherInterface Event dispatcher */
     private $dispatcher;
 
+    /** @var bool Enable write test for ssd flag */
+    private $ssdWriteTestEnabled;
 
     /**
      * Class constructor.
@@ -69,7 +72,8 @@ class TestCommand extends Command
     protected function configure(): void
     {
         $this->setDescription('Run drive tester')
-            ->addOption('auto-detect', 'a', null, 'Auto detect drives (without system drive)')
+            ->addOption('auto-detect', 'a', InputOption::VALUE_NONE, 'Auto detect drives (without system drive)')
+            ->addOption('force-ssd-writes', null, InputOption::VALUE_NONE, 'Enable write test for ssd')
             ->addArgument('drives', InputArgument::IS_ARRAY, 'Drives path separate with a space (e.g. \'/dev/sdb /dev/sdc\')');
     }
 
@@ -79,6 +83,7 @@ class TestCommand extends Command
      * @param InputInterface $input Input interface
      * @param OutputInterface $output Output interface
      * @return int
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -88,6 +93,10 @@ class TestCommand extends Command
             $output->writeln('Invalid drive path or not exists!');
             return 3;
         }
+
+        /** @var bool $ssdWriteTestEnabled */
+        $ssdWriteTestEnabled = $input->getOption('force-ssd-writes');
+        $this->ssdWriteTestEnabled = $ssdWriteTestEnabled;
 
         // detect system drives
         $systemDrives = $this->driveDiscoveryCmd->detectSystemDrives();
@@ -188,7 +197,7 @@ class TestCommand extends Command
 
         // started processes
         foreach ($paths as $path) {
-            $checker = $this->checkerFactory->create($path);
+            $checker = $this->checkerFactory->create($path, $this->ssdWriteTestEnabled);
             $process = new Process($checker);
             if (!$process->isStarted()) {
                 $process->start();

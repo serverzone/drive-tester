@@ -39,10 +39,11 @@ class CheckerFactory
      * Create DriveChecker instance.
      *
      * @param string $path Drive path
+     * @param bool $ssdWriteTestEnabled Enable write test for ssd flag
      * @return Checker
      */
-    public function create(string $path): Checker
+    public function create(string $path, bool $ssdWriteTestEnabled = false): Checker
     {
-        return new Checker($path, $this->driveFactory, $this->cache, $this->dispatcher);
+        return new Checker($path, $ssdWriteTestEnabled, $this->driveFactory, $this->cache, $this->dispatcher);
     }
 }

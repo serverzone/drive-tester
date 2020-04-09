@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tests\DriveTester;
 
@@ -10,10 +8,10 @@ use App\Checker\Status;
 use App\Drive\Drive;
 use App\Drive\DriveFactory;
 use Faker\Factory;
-use Tester\Assert;
-use Nette\DI\Container;
 use Mockery;
+use Nette\DI\Container;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Tester\Assert;
 
 $container = require __DIR__ . '/../bootstrap.php';
 
@@ -31,7 +29,7 @@ class CheckerTest extends \Tester\TestCase
     /**
      * Class constructor.
      *
-     * @param Containter $containter Nette DI container
+     * @param Container $container
      */
     public function __construct(Container $container)
     {
@@ -52,16 +50,20 @@ class CheckerTest extends \Tester\TestCase
     /**
      * No badblocks detected test.
      *
+     * @dataProvider dataProvider
+     *
+     * @param bool $isSdd
+     * @param bool $ssdWriteTestEnabled
      * @return void
      */
-    public function testNoBadblocks(): void
+    public function testNoBadblocks(bool $isSdd, bool $ssdWriteTestEnabled): void
     {
         // prepare test
         $path = $this->faker->regexify('/dev/sd[a-z]{1,3}');
         $sn = $this->faker->regexify('[A-Z0-9]{10,15}');
 
         // run checker
-        $status = $this->runChecker($path, $sn);
+        $status = $this->runChecker($path, $sn, $isSdd, $ssdWriteTestEnabled, 0);
 
         // check status
         Assert::same($sn, $status->getSerialNumber());
@@ -72,9 +74,13 @@ class CheckerTest extends \Tester\TestCase
     /**
      * Bad blocks detected test.
      *
+     * @dataProvider dataProvider
+     *
+     * @param bool $isSdd
+     * @param bool $ssdWriteTestEnabled
      * @return void
      */
-    public function testBadblocks(): void
+    public function testBadblocks(bool $isSdd, bool $ssdWriteTestEnabled): void
     {
         // prepare test
         $path = $this->faker->regexify('/dev/sd[a-z]{1,3}');
@@ -82,7 +88,7 @@ class CheckerTest extends \Tester\TestCase
         $badblocks = rand(1, 128);
 
         // run checker
-        $status = $this->runChecker($path, $sn, $badblocks);
+        $status = $this->runChecker($path, $sn, $isSdd, $ssdWriteTestEnabled, $badblocks);
 
         // check status
         Assert::same($sn, $status->getSerialNumber());
@@ -91,22 +97,45 @@ class CheckerTest extends \Tester\TestCase
     }
 
     /**
+     * Tests data provider.
+     *
+     * @return array
+     */
+    protected function dataProvider(): array
+    {
+        return [
+            [true, true],
+            [true, false],
+            [false, true],
+            [false, false],
+        ];
+    }
+
+    /**
      * Run checker.
      *
      * @param string $path Drive path
      * @param string $sn Drive serial number
+     * @param bool $ssdWriteTestEnabled Enable write test for ssd flag
      * @param integer $badblocks Number of detected badblocks
      * @return Status
+     * @throws \Exception
      */
-    protected function runChecker(string $path, string $sn, int $badblocks = 0): Status
+    protected function runChecker(string $path, string $sn, bool $isSsd, bool $ssdWriteTestEnabled = false, int $badblocks = 0): Status
     {
         $drive = Mockery::mock(Drive::class, [
             'getSerialNumber' => $sn,
             'getPartedInfo' => 'partedInfo',
             'getSmartctlInfo' => 'smartctlInfo',
-            'badblocks' => $badblocks,
-            'isSsd' => false,
+            'isSsd' => $isSsd,
         ]);
+        if ($isSsd) {
+            $drive->shouldReceive('fstrim');
+        }
+        $drive->shouldReceive('badblocks')
+            ->with($isSsd ? $ssdWriteTestEnabled : true, \Mockery::type('array'))
+            ->once()
+            ->andReturn($badblocks);
         $driveFactory = Mockery::mock(DriveFactory::class, [
             'create' => $drive,
         ]);
@@ -117,7 +146,7 @@ class CheckerTest extends \Tester\TestCase
             ]
         );
 
-        $checker = new Checker($path, $driveFactory, $this->cache, $dispatcher);
+        $checker = new Checker($path, $ssdWriteTestEnabled, $driveFactory, $this->cache, $dispatcher);
         $checker->run();
 
         return $this->cache->getStatus($path);

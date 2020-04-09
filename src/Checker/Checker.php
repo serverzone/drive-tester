@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\Checker;
 
@@ -31,17 +29,22 @@ class Checker implements Runnable
     /** @var EventDispatcherInterface Event dispatcher */
     protected $dispatcher;
 
+    /** @var bool Enable write test for ssd flag */
+    private $ssdWriteTestEnabled;
+
     /**
      * Undocumented function
      *
      * @param string $path Device path
+     * @param bool $ssdWriteTestEnabled Enable write test for ssd flag
      * @param DriveFactory $driveFactory Drive factory
      * @param SharedStatusCache $cache Shared status cache
      * @param EventDispatcherInterface $dispatcher Event dispatcher
      */
-    public function __construct(string $path, DriveFactory $driveFactory, SharedStatusCache $cache, EventDispatcherInterface $dispatcher)
+    public function __construct(string $path, bool $ssdWriteTestEnabled, DriveFactory $driveFactory, SharedStatusCache $cache, EventDispatcherInterface $dispatcher)
     {
         $this->path = $path;
+        $this->ssdWriteTestEnabled = $ssdWriteTestEnabled;
         $this->cache = $cache;
         $this->driveFactory = $driveFactory;
         $this->dispatcher = $dispatcher;
@@ -51,6 +54,7 @@ class Checker implements Runnable
      * Run checker.
      *
      * @return void
+     * @throws \Exception
      */
     public function run(): void
     {
@@ -70,6 +74,7 @@ class Checker implements Runnable
                 return;
             }
             $status->setSerialNumber($driveSerialNumber);
+            $isSsd = $drive->isSsd();
 
             $options = [
                 'startedAt' => new DateTime(),
@@ -83,7 +88,8 @@ class Checker implements Runnable
             $drive->getSmartctlInfo(array_merge($options, ['label' => 'smartctl']));
 
             $this->updateStatus($status, 'Checking bad blocks');
-            $badBlocksCount = $drive->badblocks(array_merge($options, ['label' => 'badblocks']));
+            $writeMode = $isSsd ? $this->ssdWriteTestEnabled : true;
+            $badBlocksCount = $drive->badblocks($writeMode, array_merge($options, ['label' => 'badblocks']));
             if ($badBlocksCount != 0) {
                 $this->updateStatus($status, sprintf('%d bad blocks found', $badBlocksCount), Status::STATE_ERROR);
             }
@@ -91,7 +97,7 @@ class Checker implements Runnable
             $this->updateStatus($status, 'Storing smartctl info');
             $drive->getSmartctlInfo(array_merge($options, ['label' => 'smartctl.badblocks']));
 
-            if ($drive->isSsd()) {
+            if ($isSsd) {
                 $this->updateStatus($status, 'Running fstrim');
                 $drive->fstrim(array_merge($options, ['label' => 'fstrim']));
                 $this->updateStatus($status, 'Storing smartctl info');
