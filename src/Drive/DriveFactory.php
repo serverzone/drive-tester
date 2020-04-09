@@ -27,9 +27,6 @@ class DriveFactory
     /** @var BadblocksCommand Detect bad blocks command */
     protected $badblocksCmd;
 
-    /** @var FstrimCommand Fstrim command  */
-    protected $fstrimCmd;
-
     /**
      * Class constructor.
      *
@@ -37,15 +34,13 @@ class DriveFactory
      * @param PartedCommand $partedCmd Parted command
      * @param SmartCtlCommand $smartCtlCmd Smartctl command
      * @param BadblocksCommand $badblocksCmd Detect bad blocks command
-     * @param FstrimCommand $fstrimCmd Fstrim command
      */
-    public function __construct(GetSerialNumberCommand $serialNoCmd, PartedCommand $partedCmd, SmartCtlCommand $smartCtlCmd, BadblocksCommand $badblocksCmd, FstrimCommand $fstrimCmd)
+    public function __construct(GetSerialNumberCommand $serialNoCmd, PartedCommand $partedCmd, SmartCtlCommand $smartCtlCmd, BadblocksCommand $badblocksCmd)
     {
         $this->serialNoCmd = $serialNoCmd;
         $this->partedCmd = $partedCmd;
         $this->smartCtlCmd = $smartCtlCmd;
         $this->badblocksCmd = $badblocksCmd;
-        $this->fstrimCmd = $fstrimCmd;
     }
 
     /**
@@ -56,6 +51,6 @@ class DriveFactory
      */
     public function create(string $path): Drive
     {
-        return new Drive($path, $this->serialNoCmd, $this->partedCmd, $this->smartCtlCmd, $this->badblocksCmd, $this->fstrimCmd);
+        return new Drive($path, $this->serialNoCmd, $this->partedCmd, $this->smartCtlCmd, $this->badblocksCmd);
     }
 }

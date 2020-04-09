@@ -97,13 +97,6 @@ class Checker implements Runnable
             $this->updateStatus($status, 'Storing smartctl info');
             $drive->getSmartctlInfo(array_merge($options, ['label' => 'smartctl.badblocks']));
 
-            if ($isSsd) {
-                $this->updateStatus($status, 'Running fstrim');
-                $drive->fstrim(array_merge($options, ['label' => 'fstrim']));
-                $this->updateStatus($status, 'Storing smartctl info');
-                $drive->getSmartctlInfo(array_merge($options, ['label' => 'smartctl.fstrim']));
-            }
-
             $this->updateStatus($status, 'OK', Status::STATE_DONE);
         } catch (ProcessFailedException | DriveException | ProcessSignaledException $ex) {
             $this->updateStatus($status, $ex->getMessage(), Status::STATE_ERROR);

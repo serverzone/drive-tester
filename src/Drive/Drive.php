@@ -35,9 +35,6 @@ class Drive
     /** @var BadblocksCommand Bad blocks command */
     protected $badblocksCmd;
 
-    /** @var FstrimCommand Fstrim command */
-    protected $fstrimCmd;
-
     /**
      * Return if it is rotate drive.
      *
@@ -62,17 +59,15 @@ class Drive
      * @param PartedCommand $partedCmd Parted command
      * @param SmartCtlCommand $smartCtlCmd Smartctl command
      * @param BadblocksCommand $badblocksCmd Detect bad blocks command
-     * @param FstrimCommand $fstrimCmd Fstrim command
      * @throws DriveException
      */
-    public function __construct(string $path, GetSerialNumberCommand $serialNoCmd, PartedCommand $partedCmd, SmartCtlCommand $smartCtlCmd, BadblocksCommand $badblocksCmd, FstrimCommand $fstrimCmd)
+    public function __construct(string $path, GetSerialNumberCommand $serialNoCmd, PartedCommand $partedCmd, SmartCtlCommand $smartCtlCmd, BadblocksCommand $badblocksCmd)
     {
         $this->path = $path;
         $this->serialNoCmd = $serialNoCmd;
         $this->partedCmd = $partedCmd;
         $this->smartCtlCmd = $smartCtlCmd;
         $this->badblocksCmd = $badblocksCmd;
-        $this->fstrimCmd = $fstrimCmd;
 
         $this->serialNo = $this->serialNoCmd->getSerialNumber($path);
         if ($this->serialNo === null) {
@@ -133,17 +128,6 @@ class Drive
     public function isSsd(): bool
     {
         return Drive::isRotate($this->path) === false ? true : false;
-    }
-
-    /**
-     * Discard unused blocks on a mounted filesystem.
-     *
-     * @param array $eventOptions Event options
-     * @return void
-     */
-    public function fstrim(array $eventOptions = []): void
-    {
-        $this->fstrimCmd->execute($this->path, $eventOptions);
     }
 
     /**

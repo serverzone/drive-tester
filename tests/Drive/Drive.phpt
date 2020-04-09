@@ -52,7 +52,7 @@ class DriveTest extends \Tester\TestCase
         $getSerialNumberCmd = Mockery::mock(GetSerialNumberCommand::class, ['getSerialNumber' => 'serialNo']);
         $badblocksCmd = Mockery::mock(BadblocksCommand::class, ['detect' => $badBlocks]);
 
-        $drive = new Drive('/dev/sda', $getSerialNumberCmd, Mockery::mock(PartedCommand::class), Mockery::mock(SmartCtlCommand::class), $badblocksCmd, Mockery::mock(FstrimCommand::class));
+        $drive = new Drive('/dev/sda', $getSerialNumberCmd, Mockery::mock(PartedCommand::class), Mockery::mock(SmartCtlCommand::class), $badblocksCmd);
         Assert::same($badBlocks, $drive->badblocks());
     }
 }

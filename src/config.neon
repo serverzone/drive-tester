@@ -5,7 +5,6 @@ services:
     ProcessFactory: App\Process\ProcessFactory
     - App\Command\BadblocksCommand(@ProcessFactory)
     - App\Command\DriveDiscoveryCommand(@ProcessFactory)
-    - App\Command\FstrimCommand(@ProcessFactory)
     - App\Command\GetSerialNumberCommand(@ProcessFactory)
     - App\Command\PartedCommand(@ProcessFactory)
     - App\Command\SmartCtlCommand(@ProcessFactory)
