@@ -4,7 +4,7 @@
     "type": "project",
     "license": "MIT",
     "require": {
-        "symfony/process": "^4.3",
+        "symfony/process": "^5.4",
         "nette/di": "^3.0",
         "nette/bootstrap": "^3.0",
         "contributte/console": "^0.7.1",
